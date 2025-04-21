@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { Link } from "react-router-dom";
+import ScoreInfoPopover from '../ScoreInfoPopover';
 
 // Helper for the "Before" gradient inline
 const GradientBefore = () => (
@@ -75,9 +76,7 @@ const HeroSection = () => {
                 <span className="font-semibold text-base">
                   AI Model Ethics Score
                 </span>
-                <span className="bg-ethic-green text-ethic-navy font-bold text-md px-3 py-1 rounded-lg">
-                  98/100
-                </span>
+                <ScoreInfoPopover score={98} max={100} />
               </div>
             </div>
           </div>
