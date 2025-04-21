@@ -303,6 +303,21 @@ const DemoSection = () => {
               <TabsTrigger value="privacy-visualizer">
                 <Shield className="mr-2" size={18} />
                 Privacy Visualizer
+                {/* Info button only for Privacy Visualizer */}
+                <span className="ml-1">
+                  <FeatureExampleDialog featureId="privacy-visualizer">
+                    <button
+                      type="button"
+                      title="Show Privacy Visualizer Example"
+                      className="p-0.5 rounded-full bg-white hover:bg-emerald-50 border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-200 ml-1"
+                      aria-label="Show Privacy Visualizer Example"
+                      tabIndex={-1}
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <Shield className="w-4 h-4 text-emerald-500" />
+                    </button>
+                  </FeatureExampleDialog>
+                </span>
               </TabsTrigger>
               <TabsTrigger value="consent-layer">
                 <UserCheck className="mr-2" size={18} />
