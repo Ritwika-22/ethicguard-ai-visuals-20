@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, Shield, UserCheck, Bell, Play, AlertTriangle, CheckCircle } from 'lucide-react';
 import PrivacyVisualizer from "@/components/PrivacyVisualizer";
+import FeatureExampleDialog from "@/components/sections/FeatureExampleDialog";
 
 const ConsentDemo = () => {
   const [consentGiven, setConsentGiven] = useState({
