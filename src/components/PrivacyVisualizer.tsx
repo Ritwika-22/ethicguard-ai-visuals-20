@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   User,
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 
+// Data type definitions
 const DATA_TYPES = [
   {
     id: "name",
@@ -104,6 +106,7 @@ const DATA_TYPES = [
   }
 ];
 
+// Define destination nodes
 const DESTINATIONS = [
   {
     id: "server",
@@ -131,6 +134,8 @@ const DESTINATIONS = [
   }
 ];
 
+// Define possible flows between data and destinations
+// This is where we need to ensure the risk property is of type SharingRisk
 const DATA_FLOWS: FlowState[] = [
   { dataType: "name", destination: "server", risk: "safe", enabled: true },
   { dataType: "name", destination: "cloud", risk: "safe", enabled: true },
@@ -166,12 +171,14 @@ export default function PrivacyVisualizer() {
     destinationId?: string;
   }>({ visible: false, type: "data" });
 
+  // Helper: get flow risk level by data type and destination
   const getFlowState = (dataTypeId: string, destinationId: string) => {
     return flowStates.find(
       flow => flow.dataType === dataTypeId && flow.destination === destinationId
     );
   };
 
+  // Helper: get style for flow paths based on risk and state
   const getFlowPathStyle = (risk: SharingRisk, enabled: boolean) => {
     if (!enabled) {
       return "stroke-gray-200 stroke-[1.5px] opacity-30";
@@ -189,6 +196,7 @@ export default function PrivacyVisualizer() {
     }
   };
 
+  // Toggle a flow's enabled state
   const toggleFlow = (dataTypeId: string, destinationId: string) => {
     setFlowStates(prev => prev.map(flow => {
       if (flow.dataType === dataTypeId && flow.destination === destinationId) {
@@ -205,6 +213,7 @@ export default function PrivacyVisualizer() {
     }));
   };
 
+  // Show info panel for data type or destination
   const showInfoFor = (type: "data" | "destination" | "flow", id: string) => {
     if (type === "data") {
       setInfoPanel({ visible: true, type, id });
@@ -229,26 +238,21 @@ export default function PrivacyVisualizer() {
     }
   };
 
+  // Close info panel
   const closeInfoPanel = () => {
     setInfoPanel({ visible: false, type: "data" });
     setSelectedDataType(null);
     setSelectedDestination(null);
   };
 
+  // Check if any risky flows are active
   const anyRiskyFlowsActive = () => {
     return flowStates.some(flow => flow.risk === "risky" && flow.enabled);
   };
 
-  const SVG_WIDTH = 900;
-  const SVG_HEIGHT = 480;
-  const LEFT_MARGIN = 120;
-  const DATA_TYPE_X = 330;
-  const DEST_X = 760;
-  const DATA_TYPE_GAP = 80;
-  const DEST_GAP = 110;
-
   return (
     <div className="flex flex-col md:flex-row gap-2 w-full min-h-[640px] pt-4 bg-shadow-background animate-fade-in">
+      {/* Left: Data Types Panel */}
       <div className="w-full md:w-64 bg-shadow-card rounded-2xl p-4 shrink-0 border border-shadow-border flex flex-col gap-2 h-fit self-start">
         <h3 className="font-semibold text-shadow-foreground mb-2">Data Types</h3>
         {DATA_TYPES.map(dt => (
@@ -272,7 +276,9 @@ export default function PrivacyVisualizer() {
         ))}
       </div>
 
+      {/* Center: Flow Map */}
       <div className="flex-1 flex flex-col items-center justify-center min-w-[340px] py-4">
+        {/* Title Section */}
         <div className="mb-4 w-full max-w-md text-center bg-white/60 rounded-xl shadow px-4 py-3 border border-shadow-border">
           <div className="text-lg font-semibold text-ethic-accent mb-1">
             Privacy Flow Visualizer
@@ -282,38 +288,44 @@ export default function PrivacyVisualizer() {
           </div>
         </div>
 
-        <div className="relative bg-shadow-card border border-shadow-border rounded-2xl p-6 w-full max-w-4xl h-[480px] shadow-sm flex items-center justify-center mx-auto mb-4">
+        {/* Data Flow Visualization */}
+        <div className="relative bg-shadow-card border border-shadow-border rounded-2xl p-6 w-full max-w-3xl h-[420px] shadow-sm flex items-center justify-center mx-auto mb-4">
           <svg
-            width={SVG_WIDTH}
-            height={SVG_HEIGHT}
-            viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
+            width="100%"
+            height="100%"
+            viewBox="0 0 800 340"
             className="block overflow-visible"
             aria-label="Data flow diagram"
           >
-            <g transform={`translate(${LEFT_MARGIN}, ${SVG_HEIGHT / 2})`} className="cursor-pointer">
-              <circle r="40" className="fill-blue-100 stroke-blue-400" />
+            {/* User Node (left) */}
+            <g transform="translate(100, 170)" className="cursor-pointer">
+              <circle 
+                r="40" 
+                className="fill-blue-100 stroke-blue-400" 
+              />
               <User size={30} x={-15} y={-15} className="text-blue-500" />
               <text x="0" y="55" textAnchor="middle" className="fill-gray-700 font-medium">
                 User
               </text>
             </g>
 
-            <g>
+            {/* Data Type Nodes (middle) */}
+            <g transform="translate(350, 25)">
               {DATA_TYPES.map((dt, idx) => {
-                const yPos = 70 + idx * DATA_TYPE_GAP;
+                const yPos = 50 + idx * 70;
                 const Icon = dt.icon;
                 return (
-                  <g
-                    key={dt.id}
-                    transform={`translate(${DATA_TYPE_X}, ${yPos})`}
+                  <g 
+                    key={dt.id} 
+                    transform={`translate(0, ${yPos})`}
                     className="cursor-pointer"
                     onClick={() => showInfoFor("data", dt.id)}
                   >
-                    <rect
-                      x="-60"
-                      y="-20"
-                      width="120"
-                      height="40"
+                    <rect 
+                      x="-60" 
+                      y="-20" 
+                      width="120" 
+                      height="40" 
                       rx="10"
                       className={`${selectedDataType === dt.id ? 'stroke-ethic-accent stroke-2' : 'stroke-gray-300'} fill-white`}
                     />
@@ -321,24 +333,133 @@ export default function PrivacyVisualizer() {
                     <text x="0" y="5" textAnchor="middle" className="fill-gray-700 font-medium text-sm">
                       {dt.label}
                     </text>
+
+                    {/* Flow paths to destinations */}
+                    {DESTINATIONS.map((dest, destIdx) => {
+                      const flow = getFlowState(dt.id, dest.id);
+                      if (!flow) return null;
+
+                      const pathStyle = getFlowPathStyle(flow.risk, flow.enabled);
+                      const destY = 50 + destIdx * 95;
+                      
+                      // Animation definition for data flow
+                      const animationId = `flow-${dt.id}-${dest.id}`;
+                      
+                      return (
+                        <g key={`${dt.id}-${dest.id}`}>
+                          {/* Define the animated markers for lines */}
+                          <defs>
+                            <marker
+                              id={`arrowhead-${dt.id}-${dest.id}`}
+                              markerWidth="10"
+                              markerHeight="7"
+                              refX="10"
+                              refY="3.5"
+                              orient="auto">
+                              <polygon 
+                                points="0 0, 10 3.5, 0 7" 
+                                className={flow.enabled ? 
+                                  (flow.risk === "safe" ? "fill-green-500" : 
+                                   flow.risk === "risky" ? "fill-red-500" : 
+                                   "fill-gray-400") : "fill-gray-200"}
+                              />
+                            </marker>
+                            {flow.enabled && (
+                              <linearGradient id={`gradient-${dt.id}-${dest.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" className={flow.risk === "safe" ? "stop-color-green-500" : 
+                                      flow.risk === "risky" ? "stop-color-red-500" : "stop-color-gray-400"} />
+                                <stop offset="100%" stopColor="white" />
+                              </linearGradient>
+                            )}
+                          </defs>
+
+                          {/* The data flow path */}
+                          <path 
+                            d={`M 70 0 L 350 ${destY - yPos}`}
+                            className={`${pathStyle} transition-all duration-300`}
+                            markerEnd={`url(#arrowhead-${dt.id}-${dest.id})`}
+                            onClick={() => showInfoFor("flow", `${dt.id}-to-${dest.id}`)}
+                          />
+                          
+                          {/* Interactive flow control */}
+                          <g 
+                            transform={`translate(200, ${(destY - yPos)/2})`}
+                            onClick={() => toggleFlow(dt.id, dest.id)}
+                            className="cursor-pointer"
+                          >
+                            <rect 
+                              x="-25" 
+                              y="-14" 
+                              width="50" 
+                              height="28"
+                              rx="14" 
+                              className={`${
+                                flow.enabled ? (
+                                  flow.risk === "safe" 
+                                    ? "fill-green-100 stroke-green-400" 
+                                    : flow.risk === "risky"
+                                      ? "fill-red-100 stroke-red-400"
+                                      : "fill-gray-100 stroke-gray-400"
+                                ) : "fill-gray-100 stroke-gray-300"
+                              }`}
+                            />
+                            <text
+                              x="0"
+                              y="4"
+                              textAnchor="middle"
+                              className={`text-xs font-medium ${
+                                flow.enabled ? (
+                                  flow.risk === "safe" 
+                                    ? "fill-green-700" 
+                                    : flow.risk === "risky"
+                                      ? "fill-red-700"
+                                      : "fill-gray-700"
+                                ) : "fill-gray-400"
+                              }`}
+                            >
+                              {flow.enabled ? "ON" : "OFF"}
+                            </text>
+                          </g>
+
+                          {/* Animated flow dots (when enabled) */}
+                          {flow.enabled && (
+                            <circle
+                              r="3"
+                              className={flow.risk === "safe" 
+                                ? "fill-green-500" 
+                                : flow.risk === "risky" 
+                                  ? "fill-red-500" 
+                                  : "fill-gray-400"}
+                            >
+                              <animateMotion
+                                dur="3s"
+                                repeatCount="indefinite"
+                                path={`M 70 0 L 350 ${destY - yPos}`}
+                              />
+                            </circle>
+                          )}
+                        </g>
+                      );
+                    })}
                   </g>
                 );
               })}
             </g>
 
-            <g>
+            {/* Destination Nodes (right) */}
+            <g transform="translate(650, 70)">
               {DESTINATIONS.map((dest, idx) => {
-                const yPos = 100 + idx * DEST_GAP + (idx === 2 ? 30 : 0);
+                const yPos = idx * 95;
                 const Icon = dest.icon;
                 return (
-                  <g
-                    key={dest.id}
-                    transform={`translate(${DEST_X}, ${yPos})`}
+                  <g 
+                    key={dest.id} 
+                    transform={`translate(0, ${yPos})`} 
                     className="cursor-pointer"
                     onClick={() => showInfoFor("destination", dest.id)}
                   >
-                    <circle
-                      r="35"
+                    <circle 
+                      r="35" 
                       className={`${dest.color}/20 ${selectedDestination === dest.id ? 'stroke-ethic-accent stroke-2' : `stroke-${dest.color}`}`}
                     />
                     <Icon size={24} x={-12} y={-12} className={`text-${dest.color.replace('bg-', '')}`} />
@@ -350,119 +471,15 @@ export default function PrivacyVisualizer() {
               })}
             </g>
 
-            <g>
-              {DATA_TYPES.map((dt, dtIdx) => {
-                const dtY = 70 + dtIdx * DATA_TYPE_GAP;
-                return DESTINATIONS.map((dest, destIdx) => {
-                  const destY = 100 + destIdx * DEST_GAP + (destIdx === 2 ? 30 : 0);
-                  const flow = getFlowState(dt.id, dest.id);
-                  if (!flow) return null;
-
-                  const path =
-                    `M ${DATA_TYPE_X + 60} ${dtY} ` +
-                    `C ${DATA_TYPE_X + 180} ${dtY}, ${DEST_X - 180} ${destY}, ${DEST_X - 35} ${destY}`;
-                  const pathStyle = getFlowPathStyle(flow.risk, flow.enabled);
-
-                  const ctrlX = (DATA_TYPE_X + DEST_X) / 2;
-                  const ctrlY = dtY + (destY - dtY) * 0.5;
-
-                  return (
-                    <g key={`${dt.id}-${dest.id}`}>
-                      <defs>
-                        <marker
-                          id={`arrowhead-${dt.id}-${dest.id}`}
-                          markerWidth="10"
-                          markerHeight="7"
-                          refX="10"
-                          refY="3.5"
-                          orient="auto"
-                        >
-                          <polygon
-                            points="0 0, 10 3.5, 0 7"
-                            className={flow.enabled ?
-                              (flow.risk === "safe" ? "fill-green-500" :
-                                flow.risk === "risky" ? "fill-red-500" :
-                                  "fill-gray-400") : "fill-gray-200"}
-                          />
-                        </marker>
-                      </defs>
-                      <path
-                        d={path}
-                        className={`${pathStyle} transition-all duration-300`}
-                        markerEnd={`url(#arrowhead-${dt.id}-${dest.id})`}
-                        onClick={() => showInfoFor("flow", `${dt.id}-to-${dest.id}`)}
-                        style={{ cursor: "pointer" }}
-                      />
-
-                      <g
-                        transform={`translate(${ctrlX}, ${ctrlY})`}
-                        onClick={() => toggleFlow(dt.id, dest.id)}
-                        className="cursor-pointer"
-                      >
-                        <rect
-                          x="-25"
-                          y="-14"
-                          width="50"
-                          height="28"
-                          rx="14"
-                          className={`${
-                            flow.enabled ? (
-                              flow.risk === "safe"
-                                ? "fill-green-100 stroke-green-400"
-                                : flow.risk === "risky"
-                                  ? "fill-red-100 stroke-red-400"
-                                  : "fill-gray-100 stroke-gray-400"
-                            ) : "fill-gray-100 stroke-gray-300"
-                          }`}
-                        />
-                        <text
-                          x="0"
-                          y="5"
-                          textAnchor="middle"
-                          className={`text-xs font-medium ${
-                            flow.enabled ? (
-                              flow.risk === "safe"
-                                ? "fill-green-700"
-                                : flow.risk === "risky"
-                                  ? "fill-red-700"
-                                  : "fill-gray-700"
-                            ) : "fill-gray-400"
-                          }`}
-                        >
-                          {flow.enabled ? "ON" : "OFF"}
-                        </text>
-                      </g>
-
-                      {flow.enabled && (
-                        <circle
-                          r="3"
-                          className={flow.risk === "safe"
-                            ? "fill-green-500"
-                            : flow.risk === "risky"
-                              ? "fill-red-500"
-                              : "fill-gray-400"}
-                        >
-                          <animateMotion
-                            dur="3s"
-                            repeatCount="indefinite"
-                            path={path}
-                          />
-                        </circle>
-                      )}
-                    </g>
-                  );
-                });
-              })}
-            </g>
-
+            {/* Alert for risky flows */}
             {anyRiskyFlowsActive() && (
-              <g transform={`translate(${SVG_WIDTH / 2}, ${SVG_HEIGHT - 25})`}>
-                <rect
-                  x="-180"
-                  y="-15"
-                  width="360"
-                  height="30"
-                  rx="6"
+              <g transform="translate(400, 330)">
+                <rect 
+                  x="-180" 
+                  y="-15" 
+                  width="360" 
+                  height="30" 
+                  rx="6" 
                   className="fill-red-100 stroke-red-300"
                 />
                 <AlertTriangle x={-170} y={-7} size={20} className="text-red-500" />
@@ -473,186 +490,186 @@ export default function PrivacyVisualizer() {
             )}
           </svg>
 
-          <div className="absolute top-3 right-3 w-64 z-10 bg-white/95 border border-shadow-border rounded-xl shadow-md p-4 animate-fade-in">
-            {infoPanel.visible && (
-              <div>
-                {infoPanel.type === "data" && (
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <h4 className="font-semibold flex items-center gap-1.5">
-                        {(() => {
-                          const dataType = DATA_TYPES.find(dt => dt.id === infoPanel.id);
-                          const Icon = dataType?.icon;
-                          return (
-                            <>
-                              {Icon && <Icon size={18} className="text-ethic-accent" />}
-                              <span>{dataType?.label}</span>
-                            </>
-                          );
-                        })()}
-                      </h4>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={closeInfoPanel}
-                        className="h-6 w-6"
-                      >
-                        ×
-                      </Button>
+          {/* Info Panel for selected items */}
+          {infoPanel.visible && (
+            <div className="absolute top-3 right-3 w-64 z-10 bg-white/95 border border-shadow-border rounded-xl shadow-md p-4 animate-fade-in">
+              {infoPanel.type === "data" && (
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-semibold flex items-center gap-1.5">
+                      {(() => {
+                        const dataType = DATA_TYPES.find(dt => dt.id === infoPanel.id);
+                        const Icon = dataType?.icon;
+                        return (
+                          <>
+                            {Icon && <Icon size={18} className="text-ethic-accent" />}
+                            <span>{dataType?.label}</span>
+                          </>
+                        );
+                      })()}
+                    </h4>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={closeInfoPanel}
+                      className="h-6 w-6"
+                    >
+                      ×
+                    </Button>
+                  </div>
+                  <div className="mb-2 text-xs space-y-1">
+                    <div className="flex gap-2">
+                      <strong className="text-gray-700">Why Collected:</strong>
+                      <span className="text-gray-600">
+                        {DATA_TYPES.find(dt => dt.id === infoPanel.id)?.details.why}
+                      </span>
                     </div>
-                    <div className="mb-2 text-xs space-y-1">
-                      <div className="flex gap-2">
-                        <strong className="text-gray-700">Why Collected:</strong>
-                        <span className="text-gray-600">
-                          {DATA_TYPES.find(dt => dt.id === infoPanel.id)?.details.why}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <strong className="text-gray-700">Storage:</strong>
-                        <span className="text-gray-600">
-                          {DATA_TYPES.find(dt => dt.id === infoPanel.id)?.details.storage}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <strong className="text-gray-700">Access:</strong>
-                        <span className="text-gray-600">
-                          {DATA_TYPES.find(dt => dt.id === infoPanel.id)?.details.access}
-                        </span>
-                      </div>
+                    <div className="flex gap-2">
+                      <strong className="text-gray-700">Storage:</strong>
+                      <span className="text-gray-600">
+                        {DATA_TYPES.find(dt => dt.id === infoPanel.id)?.details.storage}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <strong className="text-gray-700">Access:</strong>
+                      <span className="text-gray-600">
+                        {DATA_TYPES.find(dt => dt.id === infoPanel.id)?.details.access}
+                      </span>
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {infoPanel.type === "destination" && (
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <h4 className="font-semibold flex items-center gap-1.5">
-                        {(() => {
-                          const destination = DESTINATIONS.find(d => d.id === infoPanel.id);
-                          const Icon = destination?.icon;
-                          return (
-                            <>
-                              {Icon && <Icon size={18} className="text-gray-700" />}
-                              <span>{destination?.label}</span>
-                            </>
-                          );
-                        })()}
-                      </h4>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={closeInfoPanel}
-                        className="h-6 w-6"
-                      >
-                        ×
-                      </Button>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-4">
-                      {DESTINATIONS.find(d => d.id === infoPanel.id)?.details}
-                    </p>
-                    <div className="text-xs text-gray-700">
-                      <p className="font-medium mb-1">Data received:</p>
-                      <ul className="space-y-1">
-                        {DATA_TYPES.map(dt => {
-                          const flow = getFlowState(dt.id, infoPanel.id || "");
-                          if (!flow) return null;
-                          return (
-                            <li key={dt.id} className="flex items-center gap-2">
-                              <div className={`w-2 h-2 rounded-full ${flow.enabled ? (
-                                flow.risk === "safe" ? "bg-green-500" : 
-                                flow.risk === "risky" ? "bg-red-500" : 
-                                "bg-gray-400"
-                              ) : "bg-gray-200"}`}></div>
-                              <span>{dt.label}</span>
-                              <span className={`ml-auto text-xs ${flow.enabled ? "text-gray-700" : "text-gray-400"}`}>
-                                {flow.enabled ? "Active" : "Inactive"}
-                              </span>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
+              {infoPanel.type === "destination" && (
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-semibold flex items-center gap-1.5">
+                      {(() => {
+                        const destination = DESTINATIONS.find(d => d.id === infoPanel.id);
+                        const Icon = destination?.icon;
+                        return (
+                          <>
+                            {Icon && <Icon size={18} className="text-gray-700" />}
+                            <span>{destination?.label}</span>
+                          </>
+                        );
+                      })()}
+                    </h4>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={closeInfoPanel}
+                      className="h-6 w-6"
+                    >
+                      ×
+                    </Button>
                   </div>
-                )}
-
-                {infoPanel.type === "flow" && (
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <h4 className="font-semibold flex items-center gap-1.5">
-                        Data Flow
-                      </h4>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={closeInfoPanel}
-                        className="h-6 w-6"
-                      >
-                        ×
-                      </Button>
-                    </div>
-
-                    {(() => {
-                      const dataType = DATA_TYPES.find(dt => dt.id === infoPanel.dataTypeId);
-                      const destination = DESTINATIONS.find(d => d.id === infoPanel.destinationId);
-                      const flow = getFlowState(infoPanel.dataTypeId || "", infoPanel.destinationId || "");
-
-                      if (!dataType || !destination || !flow) return null;
-
-                      const DataIcon = dataType.icon;
-                      const DestIcon = destination.icon;
-
-                      return (
-                        <>
-                          <div className="flex items-center justify-center gap-2 mb-2">
-                            <div className="flex items-center gap-1">
-                              <DataIcon size={16} className="text-gray-600" />
-                              <span className="text-xs">{dataType.label}</span>
-                            </div>
-                            <ArrowRight size={14} className="text-gray-400" />
-                            <div className="flex items-center gap-1">
-                              <DestIcon size={16} className="text-gray-600" />
-                              <span className="text-xs">{destination.label}</span>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col gap-1 text-xs mb-3">
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-600">Status:</span>
-                              <span className={`font-medium ${flow.enabled ? "text-green-600" : "text-gray-500"}`}>
-                                {flow.enabled ? "Active" : "Inactive"}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-600">Risk Level:</span>
-                              <span className={`font-medium ${
-                                flow.risk === "safe" ? "text-green-600" :
-                                flow.risk === "risky" ? "text-red-600" :
-                                "text-gray-600"
-                              }`}>
-                                {flow.risk === "safe" ? "Safe" :
-                                 flow.risk === "risky" ? "Risky" :
-                                 "Optional"}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-                            <span className="text-sm">Toggle Flow:</span>
-                            <Switch
-                              checked={flow.enabled}
-                              onCheckedChange={() => toggleFlow(dataType.id, destination.id)}
-                            />
-                          </div>
-                        </>
-                      );
-                    })()}
+                  <p className="text-sm text-gray-600 mb-4">
+                    {DESTINATIONS.find(d => d.id === infoPanel.id)?.details}
+                  </p>
+                  <div className="text-xs text-gray-700">
+                    <p className="font-medium mb-1">Data received:</p>
+                    <ul className="space-y-1">
+                      {DATA_TYPES.map(dt => {
+                        const flow = getFlowState(dt.id, infoPanel.id || "");
+                        if (!flow) return null;
+                        return (
+                          <li key={dt.id} className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${flow.enabled ? (
+                              flow.risk === "safe" ? "bg-green-500" : 
+                              flow.risk === "risky" ? "bg-red-500" : 
+                              "bg-gray-400"
+                            ) : "bg-gray-200"}`}></div>
+                            <span>{dt.label}</span>
+                            <span className={`ml-auto text-xs ${flow.enabled ? "text-gray-700" : "text-gray-400"}`}>
+                              {flow.enabled ? "Active" : "Inactive"}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </div>
-                )}
-              </div>
-            )}
-          </div>
+                </div>
+              )}
+
+              {infoPanel.type === "flow" && (
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-semibold flex items-center gap-1.5">
+                      Data Flow
+                    </h4>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={closeInfoPanel}
+                      className="h-6 w-6"
+                    >
+                      ×
+                    </Button>
+                  </div>
+
+                  {(() => {
+                    const dataType = DATA_TYPES.find(dt => dt.id === infoPanel.dataTypeId);
+                    const destination = DESTINATIONS.find(d => d.id === infoPanel.destinationId);
+                    const flow = getFlowState(infoPanel.dataTypeId || "", infoPanel.destinationId || "");
+
+                    if (!dataType || !destination || !flow) return null;
+
+                    const DataIcon = dataType.icon;
+                    const DestIcon = destination.icon;
+
+                    return (
+                      <>
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <div className="flex items-center gap-1">
+                            <DataIcon size={16} className="text-gray-600" />
+                            <span className="text-xs">{dataType.label}</span>
+                          </div>
+                          <ArrowRight size={14} className="text-gray-400" />
+                          <div className="flex items-center gap-1">
+                            <DestIcon size={16} className="text-gray-600" />
+                            <span className="text-xs">{destination.label}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-1 text-xs mb-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-600">Status:</span>
+                            <span className={`font-medium ${flow.enabled ? "text-green-600" : "text-gray-500"}`}>
+                              {flow.enabled ? "Active" : "Inactive"}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-600">Risk Level:</span>
+                            <span className={`font-medium ${
+                              flow.risk === "safe" ? "text-green-600" :
+                              flow.risk === "risky" ? "text-red-600" :
+                              "text-gray-600"
+                            }`}>
+                              {flow.risk === "safe" ? "Safe" :
+                               flow.risk === "risky" ? "Risky" :
+                               "Optional"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                          <span className="text-sm">Toggle Flow:</span>
+                          <Switch
+                            checked={flow.enabled}
+                            onCheckedChange={() => toggleFlow(dataType.id, destination.id)}
+                          />
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
+        {/* Legend */}
         <div className="px-4 py-2 bg-white/70 rounded-xl border border-shadow-border shadow-sm flex flex-wrap gap-4 items-center justify-center text-sm">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-full bg-green-500"></div>
